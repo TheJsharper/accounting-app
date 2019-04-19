@@ -5,13 +5,16 @@ import {Router} from '@angular/router';
 import {User} from 'firebase';
 import {map} from 'rxjs/operators';
 import {Observable} from 'rxjs';
+import * as UserLocal from './user.model';
+import {AngularFireStorage} from '@angular/fire/storage';
+import {AngularFirestore} from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  constructor(private afAth: AngularFireAuth, private router: Router) {
+  constructor(private afAth: AngularFireAuth, private router: Router, private afDB: AngularFirestore) {
   }
 
   initAuthListener(): void {
@@ -24,6 +27,12 @@ export class AuthService {
     this.afAth.auth.createUserAndRetrieveDataWithEmailAndPassword(email, password)
       .then(async (userCredential: firebase.auth.UserCredential) => {
         console.log(userCredential);
+        const user: UserLocal.User = {
+          name,
+          email: userCredential.user.email,
+          uid: userCredential.user.uid
+        };
+        await this.afDB.doc(`${user.uid}/user`).set(user);
         await this.router.navigate(['/']);
       }).then((err: any) => {
       console.log(err);
