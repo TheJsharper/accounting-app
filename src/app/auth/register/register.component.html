@@ -50,7 +50,11 @@
             </div>
 
             <div class="form-group">
-              <button class="btn btn-primary submit-btn btn-block" [disabled]="form.invalid">Signup</button>
+              <button class="btn btn-primary submit-btn btn-block" [disabled]="form.invalid" *ngIf="!(statusLoading$ | async)?.isLoading">Signup</button>
+              <button class="btn btn-primary submit-btn btn-block" [disabled]="true" *ngIf="(statusLoading$ | async)?.isLoading">
+                <i class="fa fa-spin fa-sync"></i>
+                creating user ....
+              </button>
             </div>
             <div class="text-block text-center my-3">
               <span class="text-small font-weight-semibold">are you registered?</span>

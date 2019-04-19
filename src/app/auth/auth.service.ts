@@ -4,29 +4,42 @@ import {Router} from '@angular/router';
 // ES6 Modules or TypeScript
 import {User} from 'firebase';
 import {map} from 'rxjs/operators';
-import {Observable} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
 import * as UserLocal from './user.model';
 import {AngularFireStorage} from '@angular/fire/storage';
 import {AngularFirestore} from '@angular/fire/firestore';
+import {AppState} from '../app.reducer';
+import {Store} from '@ngrx/store';
+import {ActiveLoadingAction, DeactivateLoadingAction} from '../shared/ui.actions';
+import {SetUserAction} from './auth.actions';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  constructor(private afAth: AngularFireAuth, private router: Router, private afDB: AngularFirestore) {
+  private subscriptions: Subscription[] = [];
+
+  constructor(private afAth: AngularFireAuth, private router: Router, private afDB: AngularFirestore, private  store: Store<AppState>) {
   }
 
   initAuthListener(): void {
     this.afAth.authState.subscribe((user: User) => {
+      if (user) {
+       this.subscriptions.push( this.afDB.doc(`${user.uid}/user`)
+          .valueChanges()
+          .subscribe((userJson: any) => this.store.dispatch(new SetUserAction(new UserLocal.User(userJson.name, userJson.email, userJson.uid)))));
+      }else {
+        this.subscriptions.forEach((s:Subscription)=> s.unsubscribe());
+      }
       console.log(user);
     });
   }
 
   createNewUser(name: string, email: string, password: string): void {
+    this.store.dispatch(new ActiveLoadingAction());
     this.afAth.auth.createUserAndRetrieveDataWithEmailAndPassword(email, password)
       .then(async (userCredential: firebase.auth.UserCredential) => {
-        console.log(userCredential);
         const user: UserLocal.User = {
           name,
           email: userCredential.user.email,
@@ -34,19 +47,23 @@ export class AuthService {
         };
         await this.afDB.doc(`${user.uid}/user`).set(user);
         await this.router.navigate(['/']);
-      }).then((err: any) => {
+        this.store.dispatch(new DeactivateLoadingAction());
+      }).catch((err: any) => {
       console.log(err);
+      this.store.dispatch(new DeactivateLoadingAction());
     });
 
   }
 
   async login(email: string, password: string): Promise<void> {
     try {
+      this.store.dispatch(new ActiveLoadingAction());
       const userCredential: firebase.auth.UserCredential = await this.afAth.auth.signInWithEmailAndPassword(email, password);
-      console.log(userCredential);
       await this.router.navigate(['/']);
+      this.store.dispatch(new DeactivateLoadingAction());
     } catch (err) {
       console.log(err);
+      this.store.dispatch(new DeactivateLoadingAction());
 
     }
 

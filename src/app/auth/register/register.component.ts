@@ -1,6 +1,10 @@
 import {Component, OnInit} from '@angular/core';
 import {NgForm} from '@angular/forms';
 import {AuthService} from '../auth.service';
+import {AppState} from '../../app.reducer';
+import {Store} from '@ngrx/store';
+import {Observable} from 'rxjs';
+import {UIState} from '../../shared/ui.reducer';
 
 @Component({
   selector: 'app-register',
@@ -9,14 +13,16 @@ import {AuthService} from '../auth.service';
 })
 export class RegisterComponent implements OnInit {
 
-  constructor(private  authService: AuthService) {
+  statusLoading$: Observable<UIState>;
+
+  constructor(private  authService: AuthService, private  store: Store<AppState>) {
   }
 
   ngOnInit() {
+    this.statusLoading$ = this.store.select('ui');
   }
 
   onSubmit(form: NgForm): void {
-    console.log('===>', form.value);
     this.authService.createNewUser(form.value.name, form.value.email, form.value.password);
     form.resetForm({});
   }

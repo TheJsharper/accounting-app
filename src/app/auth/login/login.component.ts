@@ -1,6 +1,10 @@
 import {Component, OnInit} from '@angular/core';
 import {NgForm} from '@angular/forms';
 import {AuthService} from '../auth.service';
+import {AppState} from '../../app.reducer';
+import {Store} from '@ngrx/store';
+import {Observable} from 'rxjs';
+import {UIState} from '../../shared/ui.reducer';
 
 @Component({
   selector: 'app-login',
@@ -8,11 +12,13 @@ import {AuthService} from '../auth.service';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
+  statusLoading$: Observable<UIState>;
 
-  constructor(private  authService: AuthService) {
+  constructor(private  authService: AuthService, private store: Store<AppState>) {
   }
 
   ngOnInit() {
+    this.statusLoading$ = this.store.select('ui');
   }
 
   async onSubmit(form: NgForm): Promise<void> {

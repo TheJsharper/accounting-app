@@ -18,6 +18,9 @@ import {AngularFirestoreModule} from '@angular/fire/firestore';
 import {AngularFireAuthModule} from '@angular/fire/auth';
 import {environment} from '../environments/environment';
 import {SweetAlert2Module} from '@sweetalert2/ngx-sweetalert2';
+import {StoreModule} from '@ngrx/store';
+import {appReducers} from './app.reducer';
+import {StoreDevtoolsModule} from '@ngrx/store-devtools';
 
 @NgModule({
   declarations: [
@@ -39,6 +42,11 @@ import {SweetAlert2Module} from '@sweetalert2/ngx-sweetalert2';
     AngularFireModule.initializeApp(environment.firebase),
     AngularFirestoreModule,
     AngularFireAuthModule,
+    StoreModule.forRoot(appReducers),
+    StoreDevtoolsModule.instrument({
+      maxAge:25,
+      logOnly:environment.production
+    }),
     SweetAlert2Module.forRoot({
       buttonsStyling: false,
       customClass: 'modal-content',
