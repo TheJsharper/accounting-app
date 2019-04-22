@@ -1,13 +1,16 @@
 import {uiReducer, UIState} from './shared/ui.reducer';
 import {ActionReducerMap} from '@ngrx/store';
 import {authReducer, AuthState} from './auth/auth.reducer';
+import {creditDebitReducer, CreditDebitState} from './credit-debit/credit-debit.reducer';
 
 export interface AppState {
   ui: UIState;
-  auth:AuthState
+  auth:AuthState,
+  creditDebit: CreditDebitState,
 }
 
 export const appReducers: ActionReducerMap<AppState> = {
   ui: uiReducer,
-  auth: authReducer
+  auth: authReducer,
+  creditDebit: creditDebitReducer
 }

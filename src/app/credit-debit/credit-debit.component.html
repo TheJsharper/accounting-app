@@ -7,14 +7,16 @@
           Especifique el monto y el tipo
         </p>
 
-        <form>
+        <form (ngSubmit)="createNewCreditDebit()" [formGroup]="form">
 
           <div class="form-group">
             <label>Descripción</label>
             <input type="text"
                    class="form-control"
                    placeholder="Descripción"
-                   name="descripcion">
+                   name="descripcion"
+                   formControlName="description"
+            >
           </div>
 
           <div class="form-group">
@@ -22,7 +24,8 @@
             <input type="number"
                    class="form-control"
                    placeholder="Monto"
-                   name="monto">
+                   name="monto"
+                   formControlName="amount">
             <p>
               Debe de ser un monto positivo
             </p>
@@ -31,24 +34,28 @@
           <div class="form-group">
             <label>Tipo</label>
             <br>
-            <button type="button" class="btn btn-primary btn-block">Ingreso</button>
-            <!-- <button type="button" class="btn btn-warning btn-block">Egreso</button> -->
+            <button *ngIf="form.get('type').value === 'credit'" (click)="setType('debit')" type="button" class="btn btn-primary btn-block">
+              credit
+            </button>
+            <button *ngIf="form.get('type').value ==='debit'" (click)="setType('credit')" type="button" class="btn btn-warning btn-block">
+              debit
+            </button>
           </div>
 
           <hr>
-          <button type="button" class="btn btn-success mr-2">
+          <button type="submit" class="btn btn-success mr-2" [disabled]="form.invalid" *ngIf="!(loadingStatus$| async)?.isLoading">
             <i class="fa fa-save"></i>
-            Agregar
+            Add
           </button>
 
-          <!--
-            <button disabled class="btn btn-success mr-2">
-              <i class="fa fa-spin fa-sync"></i>
-              Espere por favor...
-            </button>
-          -->
 
-          <button type="reset" class="btn btn-light">Cancelar</button>
+            <button disabled class="btn btn-success mr-2" *ngIf="(loadingStatus$| async)?.isLoading">
+              <i class="fa fa-spin fa-sync"></i>
+              Please waiting
+            </button>
+
+
+          <button type="reset" class="btn btn-light">Cancel</button>
 
         </form>
       </div>

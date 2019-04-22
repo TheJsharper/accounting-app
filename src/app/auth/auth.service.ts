@@ -3,7 +3,7 @@ import {AngularFireAuth} from '@angular/fire/auth';
 import {Router} from '@angular/router';
 // ES6 Modules or TypeScript
 import {User} from 'firebase';
-import {map} from 'rxjs/operators';
+import {map, tap} from 'rxjs/operators';
 import {Observable, Subscription} from 'rxjs';
 import * as UserLocal from './user.model';
 import {AngularFireStorage} from '@angular/fire/storage';
@@ -19,6 +19,11 @@ import {SetUserAction, UnsetUserAction} from './auth.actions';
 export class AuthService {
 
   private subscriptions: Subscription[] = [];
+  private userLocal: UserLocal.User;
+
+  public get UserLocal(): UserLocal.User {
+    return {...this.userLocal};
+  }
 
   constructor(private afAth: AngularFireAuth, private router: Router, private afDB: AngularFirestore, private  store: Store<AppState>) {
   }
@@ -26,15 +31,22 @@ export class AuthService {
   initAuthListener(): void {
     this.afAth.authState.subscribe((user: User) => {
       if (user) {
-       this.subscriptions.push( this.afDB.doc(`${user.uid}/user`)
+        this.subscriptions.push(this.afDB.doc(`${user.uid}/user`)
           .valueChanges()
-          .subscribe((userJson: any) => this.store.dispatch(new SetUserAction(new UserLocal.User(userJson.name, userJson.email, userJson.uid)))));
-      }else {
-        this.subscriptions.forEach((s:Subscription)=> s.unsubscribe());
+          .subscribe((userJson: any) => {
+              this.userLocal = new UserLocal.User(userJson.name, userJson.email, userJson.uid);
+              this.store.dispatch(new SetUserAction(this.userLocal));
+
+            }
+          ));
+      } else {
+        this.userLocal = null;
+        this.subscriptions.forEach((s: Subscription) => s.unsubscribe());
       }
       console.log(user);
     });
   }
+
 
   createNewUser(name: string, email: string, password: string): void {
     this.store.dispatch(new ActiveLoadingAction());

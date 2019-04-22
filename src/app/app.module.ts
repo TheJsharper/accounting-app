@@ -12,7 +12,7 @@ import {DetailComponent} from './credit-debit/detail/detail.component';
 import {FooterComponent} from './shared/footer/footer.component';
 import {NavbarComponent} from './shared/navbar/navbar.component';
 import {SidebarComponent} from './shared/sidebar/sidebar.component';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {AngularFireModule} from '@angular/fire';
 import {AngularFirestoreModule} from '@angular/fire/firestore';
 import {AngularFireAuthModule} from '@angular/fire/auth';
@@ -39,6 +39,7 @@ import {StoreDevtoolsModule} from '@ngrx/store-devtools';
     BrowserModule,
     AppRoutingModule,
     FormsModule,
+    ReactiveFormsModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFirestoreModule,
     AngularFireAuthModule,
