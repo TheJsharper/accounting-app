@@ -43,7 +43,7 @@ export class CreditDebitService {
             const cdModel: CreditDebitModel = {...v.payload.doc.data(), uid: v.payload.doc.id};
             return cdModel;
           });
-        }));//.subscribe((id: any) => console.log(id));
+        }));
 
   }
 
@@ -56,5 +56,11 @@ export class CreditDebitService {
 
   getCreditDebit(): Observable<CreditDebitModel[]> {
     return this.afDB.collection<CreditDebitModel>(`${this.authService.UserLocal.uid}/credit-debit/items`).valueChanges();
+  }
+
+  async removeCreditDebit(uid: string): Promise<void> {
+
+    const authState: AuthState = await this.getAuthState();
+    return this.afDB.doc(`${authState.user.uid}/credit-debit/items/${uid}`).delete();
   }
 }

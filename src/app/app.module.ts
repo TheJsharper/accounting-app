@@ -21,6 +21,8 @@ import {SweetAlert2Module} from '@sweetalert2/ngx-sweetalert2';
 import {StoreModule} from '@ngrx/store';
 import {appReducers} from './app.reducer';
 import {StoreDevtoolsModule} from '@ngrx/store-devtools';
+import { OrderByCreditDebitPipe } from './credit-debit/order-by-credit-debit.pipe';
+import { ChartsModule } from 'ng2-charts';
 
 @NgModule({
   declarations: [
@@ -33,7 +35,8 @@ import {StoreDevtoolsModule} from '@ngrx/store-devtools';
     DetailComponent,
     FooterComponent,
     NavbarComponent,
-    SidebarComponent
+    SidebarComponent,
+    OrderByCreditDebitPipe
   ],
   imports: [
     BrowserModule,
@@ -44,6 +47,7 @@ import {StoreDevtoolsModule} from '@ngrx/store-devtools';
     AngularFirestoreModule,
     AngularFireAuthModule,
     StoreModule.forRoot(appReducers),
+    ChartsModule,
     StoreDevtoolsModule.instrument({
       maxAge:25,
       logOnly:environment.production
@@ -55,6 +59,7 @@ import {StoreDevtoolsModule} from '@ngrx/store-devtools';
       cancelButtonClass: 'btn'
     })
   ],
+  exports:[ChartsModule],
   providers: [],
   bootstrap: [AppComponent]
 })

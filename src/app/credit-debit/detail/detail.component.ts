@@ -3,6 +3,7 @@ import {AppState} from '../../app.reducer';
 import {Store} from '@ngrx/store';
 import {CreditDebitState} from '../credit-debit.reducer';
 import {Observable} from 'rxjs';
+import {CreditDebitService} from '../credit-debit.service';
 
 @Component({
   selector: 'app-detail',
@@ -11,16 +12,18 @@ import {Observable} from 'rxjs';
 })
 export class DetailComponent implements OnInit {
   creditDebit$: Observable<CreditDebitState>;
+  removeItemAsync: (uid: string) => Promise<void>;
 
-  constructor(private store: Store<AppState>) {
+  constructor(private store: Store<AppState>, private  creditDebitService: CreditDebitService) {
   }
 
   ngOnInit() {
     this.creditDebit$ = this.store.select('creditDebit');
+    this.removeItemAsync = this.removeItem;
   }
 
-  removeItem(uid: string): void {
-    console.log(uid);
+  async removeItem(uid: string): Promise<void> {
+    await this.creditDebitService.removeCreditDebit(uid);
   }
 
 }

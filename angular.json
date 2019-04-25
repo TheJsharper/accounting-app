@@ -30,7 +30,7 @@
               "src/styles.scss",
               "node_modules/bootstrap/dist/css/bootstrap.min.css"
             ],
-            "scripts": [],
+            "scripts": ["./node_modules/ng2-charts/bundles/ng2-charts.umd.js"],
             "es5BrowserSupport": true
           },
           "configurations": {
@@ -87,7 +87,7 @@
             "styles": [
               "src/styles.scss"
             ],
-            "scripts": [],
+            "scripts": [ "./node_modules/chart.js/dist/Chart.js", "./node_modules/chart.js/dist/Chart.bundle.js", "./node_modules/ng2-charts/fesm5/ng2-charts.js"],
             "assets": [
               "src/favicon.ico",
               "src/assets"
