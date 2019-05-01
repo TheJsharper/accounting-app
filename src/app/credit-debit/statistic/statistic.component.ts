@@ -5,6 +5,7 @@ import {combineLatest, Observable} from 'rxjs';
 import {CreditDebitState} from '../credit-debit.reducer';
 import {map} from 'rxjs/operators';
 import {CreditDebitModel} from '../credit-debit.model';
+import "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-statistic',
@@ -48,9 +49,6 @@ export class StatisticComponent implements OnInit {
       }, 0)
     ));
     this.creditDebit$ = combineLatest(this.totalCredit$, this.totalDebit$);
-    /* creditDebit$.pipe(map((value:[number,number])=>{
-
-       }))*/
   }
 
 

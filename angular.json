@@ -87,7 +87,7 @@
             "styles": [
               "src/styles.scss"
             ],
-            "scripts": [ "./node_modules/chart.js/dist/Chart.js", "./node_modules/chart.js/dist/Chart.bundle.js", "./node_modules/ng2-charts/fesm5/ng2-charts.js"],
+            "scripts": [],
             "assets": [
               "src/favicon.ico",
               "src/assets"

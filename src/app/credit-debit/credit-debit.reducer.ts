@@ -1,10 +1,16 @@
 import {CreditDebitModel} from './credit-debit.model';
 import {creditDebitActions, SET_ITEMS, SetItemsAction, UNSET_ITEMS} from './credit-debit.actions';
+import {AppState} from '../app.reducer';
+import {ActionReducerMap} from '@ngrx/store';
+import {uiReducer} from '../shared/ui.reducer';
+import {authReducer} from '../auth/auth.reducer';
 
 export interface CreditDebitState {
   items: CreditDebitModel[];
 }
-
+export interface AppState extends AppState{
+ creditDebit: CreditDebitState,
+}
 const initialState: CreditDebitState = {
   items: []
 };
@@ -26,4 +32,9 @@ export function creditDebitReducer(state: CreditDebitState = initialState, actio
     default :
       return state;
   }
+}
+
+export const creditDebitReducers: ActionReducerMap<AppState> = {
+
+  creditDebit: creditDebitReducer
 }

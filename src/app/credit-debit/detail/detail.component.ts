@@ -5,6 +5,7 @@ import {CreditDebitState} from '../credit-debit.reducer';
 import {Observable} from 'rxjs';
 import {CreditDebitService} from '../credit-debit.service';
 
+
 @Component({
   selector: 'app-detail',
   templateUrl: './detail.component.html',

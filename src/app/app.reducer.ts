@@ -4,13 +4,13 @@ import {authReducer, AuthState} from './auth/auth.reducer';
 import {creditDebitReducer, CreditDebitState} from './credit-debit/credit-debit.reducer';
 
 export interface AppState {
-  ui: UIState;
-  auth:AuthState,
-  creditDebit: CreditDebitState,
+  ui?: UIState;
+  auth?:AuthState,
+ // creditDebit: CreditDebitState,
 }
 
 export const appReducers: ActionReducerMap<AppState> = {
   ui: uiReducer,
   auth: authReducer,
-  creditDebit: creditDebitReducer
+//  creditDebit: creditDebitReducer
 }
