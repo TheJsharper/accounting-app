@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {AppState} from '../../app.reducer';
 import {Store} from '@ngrx/store';
 import {combineLatest, Observable} from 'rxjs';
-import {CreditDebitState} from '../credit-debit.reducer';
+import {AppStateExtend, CreditDebitState} from '../credit-debit.reducer';
 import {map} from 'rxjs/operators';
 import {CreditDebitModel} from '../credit-debit.model';
 import "@ng-bootstrap/ng-bootstrap";
@@ -24,7 +24,7 @@ export class StatisticComponent implements OnInit {
   public doughnutChartLabels: string[] = ['Credit', 'Debit'];
 
 
-  constructor(private store: Store<AppState>) {
+  constructor(private store: Store<AppStateExtend>) {
   }
 
   ngOnInit() {

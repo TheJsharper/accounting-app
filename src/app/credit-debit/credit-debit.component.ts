@@ -7,6 +7,7 @@ import {Store} from '@ngrx/store';
 import {Observable} from 'rxjs';
 import {UIState} from '../shared/ui.reducer';
 import {ActiveLoadingAction, DeactivateLoadingAction} from '../shared/ui.actions';
+import {AppStateExtend} from './credit-debit.reducer';
 
 @Component({
   selector: 'app-credit-debit',
@@ -17,7 +18,7 @@ export class CreditDebitComponent implements OnInit {
   form: FormGroup;
   loadingStatus$: Observable<UIState>;
 
-  constructor(private  creditDebitService: CreditDebitService, private store: Store<AppState>) {
+  constructor(private  creditDebitService: CreditDebitService, private store: Store<AppStateExtend>) {
   }
 
   ngOnInit() {

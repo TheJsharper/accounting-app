@@ -6,7 +6,7 @@ import {creditDebitReducer, CreditDebitState} from './credit-debit/credit-debit.
 export interface AppState {
   ui?: UIState;
   auth?:AuthState,
- // creditDebit: CreditDebitState,
+  //creditDebit?: null,
 }
 
 export const appReducers: ActionReducerMap<AppState> = {

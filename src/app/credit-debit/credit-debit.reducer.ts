@@ -8,7 +8,7 @@ import {authReducer} from '../auth/auth.reducer';
 export interface CreditDebitState {
   items: CreditDebitModel[];
 }
-export interface AppState extends AppState{
+export interface AppStateExtend extends AppState{
  creditDebit: CreditDebitState,
 }
 const initialState: CreditDebitState = {
@@ -34,7 +34,7 @@ export function creditDebitReducer(state: CreditDebitState = initialState, actio
   }
 }
 
-export const creditDebitReducers: ActionReducerMap<AppState> = {
+export const creditDebitReducers: ActionReducerMap<AppStateExtend> = {
 
   creditDebit: creditDebitReducer
 }

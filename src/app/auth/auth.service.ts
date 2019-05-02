@@ -12,6 +12,7 @@ import {AppState} from '../app.reducer';
 import {Store} from '@ngrx/store';
 import {ActiveLoadingAction, DeactivateLoadingAction} from '../shared/ui.actions';
 import {SetUserAction, UnsetUserAction} from './auth.actions';
+import {UnsetItemsAction} from '../credit-debit/credit-debit.actions';
 
 @Injectable({
   providedIn: 'root'
@@ -85,6 +86,7 @@ export class AuthService {
     await this.router.navigate(['/login']);
     await this.afAth.auth.signOut();
     this.store.dispatch(new UnsetUserAction());
+    this.store.dispatch(new UnsetItemsAction());
   }
 
   isAuth(): Observable<boolean> {

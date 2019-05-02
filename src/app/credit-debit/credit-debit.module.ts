@@ -12,6 +12,7 @@ import {DashboardRoutingModule} from '../dashboard/dashboard-routing.module';
 import {StoreModule} from '@ngrx/store';
 import {creditDebitReducer, creditDebitReducers} from './credit-debit.reducer';
 
+
 @NgModule({
   declarations: [
     DashboardComponent,
@@ -19,7 +20,6 @@ import {creditDebitReducer, creditDebitReducers} from './credit-debit.reducer';
     StatisticComponent,
     DetailComponent,
     OrderByCreditDebitPipe,
-    StoreModule.forFeature('creditDebit', creditDebitReducers),
   ],
   imports: [
     CommonModule,
@@ -27,6 +27,7 @@ import {creditDebitReducer, creditDebitReducers} from './credit-debit.reducer';
     ChartsModule,
     SharedModule,
     DashboardRoutingModule,
+    StoreModule.forFeature('creditDebit', creditDebitReducer)
   ]
 })
 export class CreditDebitModule {
