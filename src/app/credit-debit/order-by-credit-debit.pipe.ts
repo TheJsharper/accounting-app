@@ -7,7 +7,7 @@ import {CreditDebitModel} from './credit-debit.model';
 export class OrderByCreditDebitPipe implements PipeTransform {
 
   transform(items: CreditDebitModel[]): CreditDebitModel[] {
-    return items.sort((a: CreditDebitModel, b: CreditDebitModel) => {
+    return items.slice().sort((a: CreditDebitModel, b: CreditDebitModel) => {
       return a.type == 'credit' ? -1 : 1;
     });
   }
