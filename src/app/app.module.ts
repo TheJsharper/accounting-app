@@ -4,7 +4,7 @@ import {NgModule} from '@angular/core';
 import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
 import {AngularFireModule} from '@angular/fire';
-import {AngularFirestoreModule} from '@angular/fire/firestore';
+import {AngularFirestoreModule, SETTINGS} from '@angular/fire/firestore';
 import {environment} from '../environments/environment';
 import {SweetAlert2Module} from '@sweetalert2/ngx-sweetalert2';
 import {StoreModule} from '@ngrx/store';
@@ -40,7 +40,9 @@ import {AuthModule} from './auth/auth.module';
     })
   ],
   exports:[ChartsModule],
-  providers: [],
+  providers: [{
+    provide:SETTINGS, useValue:{}
+  }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

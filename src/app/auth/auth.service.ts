@@ -51,7 +51,6 @@ export class AuthService {
 
   createNewUser(name: string, email: string, password: string): void {
     this.store.dispatch(new ActiveLoadingAction());
-    //this.afAth.auth.createUserAndRetrieveDataWithEmailAndPassword(email, password)
     this.afAth.createUserWithEmailAndPassword(email, password)
       .then(async (userCredential: firebase.auth.UserCredential) => {
         const user: UserLocal.User = {
