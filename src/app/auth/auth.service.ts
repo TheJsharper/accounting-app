@@ -51,7 +51,8 @@ export class AuthService {
 
   createNewUser(name: string, email: string, password: string): void {
     this.store.dispatch(new ActiveLoadingAction());
-    this.afAth.auth.createUserAndRetrieveDataWithEmailAndPassword(email, password)
+    //this.afAth.auth.createUserAndRetrieveDataWithEmailAndPassword(email, password)
+    this.afAth.createUserWithEmailAndPassword(email, password)
       .then(async (userCredential: firebase.auth.UserCredential) => {
         const user: UserLocal.User = {
           name,
@@ -71,7 +72,7 @@ export class AuthService {
   async login(email: string, password: string): Promise<void> {
     try {
       this.store.dispatch(new ActiveLoadingAction());
-      const userCredential: firebase.auth.UserCredential = await this.afAth.auth.signInWithEmailAndPassword(email, password);
+      const userCredential: firebase.auth.UserCredential = await this.afAth.signInWithEmailAndPassword(email, password);
       await this.router.navigate(['/']);
       this.store.dispatch(new DeactivateLoadingAction());
     } catch (err) {
@@ -84,7 +85,7 @@ export class AuthService {
 
   async logout(): Promise<void> {
     await this.router.navigate(['/login']);
-    await this.afAth.auth.signOut();
+    await this.afAth.signOut();
     this.store.dispatch(new UnsetUserAction());
     this.store.dispatch(new UnsetItemsAction());
   }
