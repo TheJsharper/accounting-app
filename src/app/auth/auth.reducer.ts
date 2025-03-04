@@ -2,10 +2,10 @@ import {User} from './user.model';
 import {authAction, SET_USER, SetUserAction, UNSET_USER, UnsetUserAction} from './auth.actions';
 
 export interface AuthState {
-  user: User;
+  user: Partial<User>;
 }
 
-const initState: AuthState = {user: null};
+const initState: AuthState = {user: {}};
 
 export function authReducer(state: AuthState = initState, action: authAction): AuthState {
   switch (action.type) {
@@ -17,7 +17,7 @@ export function authReducer(state: AuthState = initState, action: authAction): A
     }
     case UNSET_USER: {
       if (action instanceof UnsetUserAction) {
-        return {user: null};
+        return {user: {}};
       }
       break;
     }
@@ -25,4 +25,5 @@ export function authReducer(state: AuthState = initState, action: authAction): A
       return state;
     }
   }
+  return state
 }

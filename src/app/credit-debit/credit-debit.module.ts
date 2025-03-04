@@ -6,7 +6,7 @@ import {StatisticComponent} from './statistic/statistic.component';
 import {DetailComponent} from './detail/detail.component';
 import {OrderByCreditDebitPipe} from './order-by-credit-debit.pipe';
 import {ReactiveFormsModule} from '@angular/forms';
-import {ChartsModule} from 'ng2-charts';
+import {NgChartsModule} from 'ng2-charts';
 import {SharedModule} from '../shared/shared.module';
 import {DashboardRoutingModule} from '../dashboard/dashboard-routing.module';
 import {StoreModule} from '@ngrx/store';
@@ -24,10 +24,10 @@ import {creditDebitReducer, creditDebitReducers} from './credit-debit.reducer';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    ChartsModule,
+    NgChartsModule,
     SharedModule,
     DashboardRoutingModule,
-    StoreModule.forFeature('creditDebit', creditDebitReducer)
+   // StoreModule.forFeature('creditDebit', creditDebitReducer)
   ]
 })
 export class CreditDebitModule {

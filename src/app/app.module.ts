@@ -1,4 +1,4 @@
-import {BrowserModule} from '@angular/platform-browser';
+/*import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 
 import {AppRoutingModule} from './app-routing.module';
@@ -33,10 +33,13 @@ import {AuthModule} from './auth/auth.module';
       logOnly:environment.production
     }),
     SweetAlert2Module.forRoot({
-      buttonsStyling: false,
-      customClass: 'modal-content',
-      confirmButtonClass: 'btn btn-primary',
-      cancelButtonClass: 'btn'
+      //buttonsStyling: false,
+    //  customClass: 'modal-content',
+     // confirmButtonClass: 'btn btn-primary',
+     // cancelButtonClass: 'btn'
+     provideSwal?: () => import('sweetalert2/dist/sweetalert2.all.js'),
+     fireOnInit?: true,
+     dismissOnDestroy?: true
     })
   ],
   exports:[ChartsModule],
@@ -44,5 +47,5 @@ import {AuthModule} from './auth/auth.module';
     provide:SETTINGS, useValue:{}
   }],
   bootstrap: [AppComponent]
-})
+})*/
 export class AppModule { }

@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, Inject, OnInit} from '@angular/core';
 import {NgForm} from '@angular/forms';
 import {AuthService} from '../auth.service';
 import {AppState} from '../../app.reducer';
@@ -13,9 +13,9 @@ import {UIState} from '../../shared/ui.reducer';
 })
 export class RegisterComponent implements OnInit {
 
-  statusLoading$: Observable<UIState>;
+  statusLoading$?: Observable<UIState| undefined>;
 
-  constructor(private  authService: AuthService, private  store: Store<AppState>) {
+  constructor(private  authService: AuthService, @Inject(Store) private  store: Store<AppState>) {
   }
 
   ngOnInit() {

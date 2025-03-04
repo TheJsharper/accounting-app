@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {CreditDebitService} from '../credit-debit/credit-debit.service';
 import {Observable, Subscription} from 'rxjs';
 import {AppState} from '../app.reducer';
@@ -14,7 +14,7 @@ import {CreditDebitModel} from '../credit-debit/credit-debit.model';
 export class DashboardComponent implements OnInit, OnDestroy {
   subscriptions: Subscription[] = [];
 
-  constructor(private creditDebitService: CreditDebitService, private  store: Store<AppState>) {
+  constructor(private creditDebitService: CreditDebitService, @Inject(Store) private  store: Store<AppState>) {
   }
 
   async ngOnInit(): Promise<void> {

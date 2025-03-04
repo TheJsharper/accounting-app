@@ -4,12 +4,12 @@ import {LoginComponent} from './auth/login/login.component';
 import {RegisterComponent} from './auth/register/register.component';
 import {AuthGuardService} from './auth/auth-guard.service';
 
-const routes: Routes = [
+export const routes: Routes = [
   {path: 'login', component: LoginComponent},
   {path: 'register', component: RegisterComponent},
   {
     path:'',
-    loadChildren: './credit-debit/credit-debit.module#CreditDebitModule',
+    loadChildren: ()=>  import( './credit-debit/credit-debit.module').then(m=>m.CreditDebitModule),
     canLoad:[AuthGuardService]
   },
   {path: '**', redirectTo: ''}

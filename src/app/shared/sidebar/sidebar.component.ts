@@ -1,10 +1,10 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, Inject, OnInit} from '@angular/core';
 import {AuthService} from '../../auth/auth.service';
 import {AppState} from '../../app.reducer';
 import {Store} from '@ngrx/store';
 import {Observable} from 'rxjs';
 import {User} from '../../auth/user.model';
-import {map} from 'rxjs/operators';
+import {filter, map} from 'rxjs/operators';
 import {AuthState} from '../../auth/auth.reducer';
 
 @Component({
@@ -14,12 +14,15 @@ import {AuthState} from '../../auth/auth.reducer';
 })
 export class SidebarComponent implements OnInit {
 
-  userInfo$:Observable<User>;
-  constructor(private  authService: AuthService, private  store:Store<AppState>) {
+  userInfo$?:Observable<Partial<User>>;
+  constructor(private  authService: AuthService, @Inject(Store)  private  store:Store<AppState>) {
   }
 
   ngOnInit() {
-    this.userInfo$ = this.store.select('auth').pipe(map((authState:AuthState)=> authState.user));
+    this.userInfo$ = this.store.select('auth').pipe(
+      filter((authState:AuthState| undefined)=> authState != null),
+      filter((authState:AuthState)=> authState.user != null),
+      map((authState:AuthState)=> authState.user));
   }
 
   async logout(): Promise<void> {

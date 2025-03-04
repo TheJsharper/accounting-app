@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, Inject, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {CreditDebitModel} from './credit-debit.model';
 import {CreditDebitService} from './credit-debit.service';
@@ -15,10 +15,10 @@ import {AppStateExtend} from './credit-debit.reducer';
   styleUrls: ['./credit-debit.component.scss']
 })
 export class CreditDebitComponent implements OnInit {
-  form: FormGroup;
-  loadingStatus$: Observable<UIState>;
+  form?: FormGroup;
+  loadingStatus$?: Observable<UIState| undefined>;
 
-  constructor(private  creditDebitService: CreditDebitService, private store: Store<AppStateExtend>) {
+  constructor(private  creditDebitService: CreditDebitService, @Inject(Store)  private store: Store<AppStateExtend>) {
   }
 
   ngOnInit() {
@@ -32,16 +32,16 @@ export class CreditDebitComponent implements OnInit {
   }
 
   setType(value: string): void {
-    this.form.get('type').setValue(value);
+    this.form?.get('type')?.setValue(value);
   }
 
   async createNewCreditDebit(): Promise<void> {
     try {
       this.store.dispatch(new ActiveLoadingAction());
-      const creditDebit: CreditDebitModel = new CreditDebitModel(this.form.get('description').value, this.form.get('amount').value, this.form.get('type').value);
+      const creditDebit: CreditDebitModel = new CreditDebitModel(this.form?.get('description')?.value, this.form?.get('amount')?.value, this.form?.get('type')?.value);
 
       await this.creditDebitService.createCreditDebit(creditDebit);
-      this.form.reset({amount: 0, type: 'credit', description: ''});
+      this.form?.reset({amount: 0, type: 'credit', description: ''});
       this.store.dispatch(new DeactivateLoadingAction());
     } catch (e) {
       console.error(e);
