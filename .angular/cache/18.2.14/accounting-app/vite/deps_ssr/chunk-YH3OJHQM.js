@@ -5,16 +5,6 @@ import {
   onIdTokenChanged
 } from "./chunk-HV2AWGOI.js";
 import {
-  FirebaseApp,
-  FirebaseApps,
-  VERSION,
-  ɵAngularFireSchedulers,
-  ɵAppCheckInstances,
-  ɵgetAllInstancesOf,
-  ɵgetDefaultInstanceOf,
-  ɵzoneWrap
-} from "./chunk-OP3R7CGS.js";
-import {
   applyActionCode,
   beforeAuthStateChanged,
   checkActionCode,
@@ -44,7 +34,6 @@ import {
   reauthenticateWithPhoneNumber,
   reauthenticateWithPopup,
   reauthenticateWithRedirect,
-  registerVersion,
   reload,
   require_undici,
   revokeAccessToken,
@@ -71,7 +60,20 @@ import {
   validatePassword,
   verifyBeforeUpdateEmail,
   verifyPasswordResetCode
-} from "./chunk-7MSQYH24.js";
+} from "./chunk-5XTFOKG7.js";
+import {
+  FirebaseApp,
+  FirebaseApps,
+  VERSION,
+  ɵAngularFireSchedulers,
+  ɵAppCheckInstances,
+  ɵgetAllInstancesOf,
+  ɵgetDefaultInstanceOf,
+  ɵzoneWrap
+} from "./chunk-MJFYZGOI.js";
+import {
+  registerVersion
+} from "./chunk-3HWNS6QV.js";
 import {
   InjectionToken,
   Injector,
@@ -331,4 +333,4 @@ rxfire/auth/index.esm.js:
    * limitations under the License.
    *)
 */
-//# sourceMappingURL=chunk-OVFEDLAY.js.map
+//# sourceMappingURL=chunk-YH3OJHQM.js.map

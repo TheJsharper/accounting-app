@@ -8,17 +8,19 @@ import {
   onLog,
   registerVersion,
   setLogLevel
-} from "./chunk-7MSQYH24.js";
+} from "./chunk-3HWNS6QV.js";
 import {
   Inject,
   Injectable,
   InjectionToken,
+  Injector,
   NgModule,
   NgZone,
   Optional,
   PLATFORM_ID,
   VERSION,
   Version,
+  makeEnvironmentProviders,
   setClassMetadata,
   ɵɵdefineInjectable,
   ɵɵdefineInjector,
@@ -40,10 +42,17 @@ var name = "firebase";
 var version = "10.14.1";
 registerVersion(name, version, "app");
 
+// node_modules/@angular/fire/fesm2022/angular-fire-app.mjs
+var import_rxjs2 = __toESM(require_cjs(), 1);
+var import_operators2 = __toESM(require_operators(), 1);
+
 // node_modules/@angular/fire/fesm2022/angular-fire.mjs
 var import_rxjs = __toESM(require_cjs(), 1);
 var import_operators = __toESM(require_operators(), 1);
 var VERSION2 = new Version("ANGULARFIRE2_VERSION");
+var ɵisSupportedError = (module) => `The APP_INITIALIZER that is "making" isSupported() sync for the sake of convenient DI has not resolved in this
+context. Rather than injecting ${module} in the constructor, first ensure that ${module} is supported by calling
+\`await isSupported()\`, then retrieve the instance from the injector manually \`injector.get(${module})\`.`;
 function ɵgetDefaultInstanceOf(identifier, provided, defaultApp) {
   if (provided) {
     if (provided.length === 1) {
@@ -240,8 +249,6 @@ var ɵzoneWrap = (it, blockUntilFirst) => {
 };
 
 // node_modules/@angular/fire/fesm2022/angular-fire-app.mjs
-var import_rxjs2 = __toESM(require_cjs(), 1);
-var import_operators2 = __toESM(require_operators(), 1);
 var FirebaseApp = class {
   constructor(app) {
     return app;
@@ -269,6 +276,16 @@ var FIREBASE_APPS_PROVIDER = {
   provide: FirebaseApps,
   deps: [[new Optional(), PROVIDED_FIREBASE_APPS]]
 };
+function firebaseAppFactory(fn) {
+  return (zone, injector) => {
+    const platformId = injector.get(PLATFORM_ID);
+    registerVersion("angularfire", VERSION2.full, "core");
+    registerVersion("angularfire", VERSION2.full, "app");
+    registerVersion("angular", VERSION.full, platformId.toString());
+    const app = zone.runOutsideAngular(() => fn(injector));
+    return new FirebaseApp(app);
+  };
+}
 var FirebaseAppModule = class _FirebaseAppModule {
   // eslint-disable-next-line @typescript-eslint/ban-types
   constructor(platformId) {
@@ -300,6 +317,14 @@ var FirebaseAppModule = class _FirebaseAppModule {
     }]
   }], null);
 })();
+function provideFirebaseApp(fn, ...deps) {
+  return makeEnvironmentProviders([DEFAULT_FIREBASE_APP_PROVIDER, FIREBASE_APPS_PROVIDER, {
+    provide: PROVIDED_FIREBASE_APPS,
+    useFactory: firebaseAppFactory(fn),
+    multi: true,
+    deps: [NgZone, Injector, ɵAngularFireSchedulers, ...deps]
+  }]);
+}
 var deleteApp2 = ɵzoneWrap(deleteApp, true);
 var getApp2 = ɵzoneWrap(getApp, true);
 var getApps2 = ɵzoneWrap(getApps, true);
@@ -311,6 +336,7 @@ var setLogLevel2 = ɵzoneWrap(setLogLevel, true);
 
 export {
   VERSION2 as VERSION,
+  ɵisSupportedError,
   ɵgetDefaultInstanceOf,
   ɵgetAllInstancesOf,
   ɵAppCheckInstances,
@@ -319,7 +345,18 @@ export {
   keepUnstableUntilFirst,
   ɵzoneWrap,
   FirebaseApp,
-  FirebaseApps
+  FirebaseApps,
+  firebaseApp$,
+  FirebaseAppModule,
+  provideFirebaseApp,
+  deleteApp2 as deleteApp,
+  getApp2 as getApp,
+  getApps2 as getApps,
+  initializeApp2 as initializeApp,
+  initializeServerApp2 as initializeServerApp,
+  onLog2 as onLog,
+  registerVersion2 as registerVersion,
+  setLogLevel2 as setLogLevel
 };
 /*! Bundled license information:
 
@@ -341,4 +378,4 @@ firebase/app/dist/index.mjs:
    * limitations under the License.
    *)
 */
-//# sourceMappingURL=chunk-OP3R7CGS.js.map
+//# sourceMappingURL=chunk-MJFYZGOI.js.map

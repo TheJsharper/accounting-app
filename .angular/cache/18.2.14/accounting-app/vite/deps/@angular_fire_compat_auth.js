@@ -1,6 +1,7 @@
 import {
   firebase
-} from "./chunk-DMV6VCME.js";
+} from "./chunk-SFR3C4X2.js";
+import "./chunk-YGS6QF24.js";
 import {
   FirebaseApp,
   VERSION as VERSION2,
@@ -11,7 +12,7 @@ import {
   ɵgetAllInstancesOf,
   ɵgetDefaultInstanceOf,
   ɵzoneWrap
-} from "./chunk-7UDSIVTD.js";
+} from "./chunk-RNWRJXG3.js";
 import {
   Component,
   Deferred,
@@ -26,11 +27,11 @@ import {
   isIndexedDBAvailable,
   registerVersion,
   uuidv4
-} from "./chunk-XE56KNTY.js";
+} from "./chunk-B6PGUFTY.js";
+import "./chunk-4VQIVXRD.js";
 import {
   isPlatformServer
 } from "./chunk-6YUX53ET.js";
-import "./chunk-4VQIVXRD.js";
 import {
   Inject,
   Injectable,
@@ -47,10 +48,10 @@ import {
   ɵɵdefineNgModule,
   ɵɵinject
 } from "./chunk-BESGKADI.js";
-import "./chunk-BRF755KY.js";
 import {
   merge
 } from "./chunk-OKKFPXIG.js";
+import "./chunk-BRF755KY.js";
 import {
   Observable,
   Subject,
@@ -1155,7 +1156,7 @@ var AngularFireAuth = class _AngularFireAuth {
   credential;
   constructor(options, name3, platformId, zone, schedulers, useEmulator, settings, tenantId, languageCode, useDeviceLanguage, persistence, _appCheckInstances) {
     const logins = new Subject();
-    const auth = of(void 0).pipe(observeOn(schedulers.outsideAngular), switchMap(() => zone.runOutsideAngular(() => import("./index.esm-6SD2QQOF.js"))), map(() => ɵfirebaseAppFactory(options, zone, name3)), map((app) => ɵauthFactory(app, zone, useEmulator, tenantId, languageCode, useDeviceLanguage, settings, persistence)), shareReplay({
+    const auth = of(void 0).pipe(observeOn(schedulers.outsideAngular), switchMap(() => zone.runOutsideAngular(() => import("./index.esm-ZK4ZSLEU.js"))), map(() => ɵfirebaseAppFactory(options, zone, name3)), map((app) => ɵauthFactory(app, zone, useEmulator, tenantId, languageCode, useDeviceLanguage, settings, persistence)), shareReplay({
       bufferSize: 1,
       refCount: false
     }));

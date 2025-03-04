@@ -20,10 +20,10 @@ import {
   ɵɵgetInheritedFactory,
   ɵɵinject
 } from "./chunk-BESGKADI.js";
-import "./chunk-BRF755KY.js";
 import {
   queueScheduler
 } from "./chunk-OKKFPXIG.js";
+import "./chunk-BRF755KY.js";
 import {
   BehaviorSubject,
   Observable,

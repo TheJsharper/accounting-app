@@ -1,11 +1,11 @@
 import { createRequire } from 'module';const require = createRequire(import.meta.url);
 import {
+  takeUntilDestroyed
+} from "./chunk-CLZZTDYN.js";
+import {
   NG_VALIDATORS,
   NG_VALUE_ACCESSOR
 } from "./chunk-SOQPLVI4.js";
-import {
-  takeUntilDestroyed
-} from "./chunk-CLZZTDYN.js";
 import {
   DOCUMENT,
   NgTemplateOutlet,

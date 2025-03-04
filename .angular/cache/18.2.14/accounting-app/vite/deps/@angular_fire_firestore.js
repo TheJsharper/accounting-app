@@ -5,7 +5,10 @@ import {
 } from "./chunk-4QVJAXCC.js";
 import {
   AuthInstances
-} from "./chunk-GCBSQAOV.js";
+} from "./chunk-WLEEGTYV.js";
+import "./chunk-JQ6VSSSG.js";
+import "./chunk-THGLK3G6.js";
+import "./chunk-YGS6QF24.js";
 import {
   FirebaseApp,
   FirebaseApps,
@@ -15,7 +18,7 @@ import {
   ɵgetAllInstancesOf,
   ɵgetDefaultInstanceOf,
   ɵzoneWrap
-} from "./chunk-7UDSIVTD.js";
+} from "./chunk-RNWRJXG3.js";
 import {
   Component,
   FirebaseError,
@@ -34,9 +37,7 @@ import {
   isIndexedDBAvailable,
   isSafari,
   registerVersion
-} from "./chunk-XE56KNTY.js";
-import "./chunk-JQ6VSSSG.js";
-import "./chunk-THGLK3G6.js";
+} from "./chunk-B6PGUFTY.js";
 import "./chunk-4VQIVXRD.js";
 import {
   InjectionToken,
@@ -49,8 +50,8 @@ import {
   ɵɵdefineInjector,
   ɵɵdefineNgModule
 } from "./chunk-BESGKADI.js";
-import "./chunk-BRF755KY.js";
 import "./chunk-OKKFPXIG.js";
+import "./chunk-BRF755KY.js";
 import {
   Observable,
   concatMap,

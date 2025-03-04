@@ -1,16 +1,14 @@
+import { createRequire } from 'module';const require = createRequire(import.meta.url);
 import {
   ActionCodeOperation,
   AuthCredential,
-  AuthEventManager,
-  Component,
-  DEFAULT_ENTRY_NAME,
+  BaseOAuthProvider,
   EmailAuthProvider,
-  ErrorFactory,
   FacebookAuthProvider,
-  FirebaseError,
+  FederatedAuthProvider,
+  FetchProvider,
   GithubAuthProvider,
   GoogleAuthProvider,
-  Logger,
   OAuthCredential,
   OAuthProvider,
   PhoneAuthProvider,
@@ -19,26 +17,24 @@ import {
   RecaptchaVerifier,
   SAMLAuthCredential,
   SAMLAuthProvider,
-  SDK_VERSION,
   TwitterAuthProvider,
-  _addComponent,
-  _addOrOverwriteComponent,
   _assert,
   _castAuth,
-  _clearRedirectOutcomes,
   _createError,
+  _emulatorUrl,
   _fail,
-  _generateEventId,
   _getInstance,
-  _getProjectConfig,
-  _getRedirectResult,
-  _getRedirectUrl,
   _isAndroid,
+  _isIE10,
   _isIOS,
   _isIOS7Or8,
-  _overrideRedirectResult,
+  _isMobileBrowser,
+  _link,
+  _performApiRequest,
   _persistenceKeyName,
-  _registerComponent,
+  _reauthenticate,
+  _serverAppCurrentUserOperationNotSupportedError,
+  _signInWithCredential,
   applyActionCode,
   browserLocalPersistence,
   browserPopupRedirectResolver,
@@ -46,50 +42,35 @@ import {
   checkActionCode,
   confirmPasswordReset,
   connectAuthEmulator,
-  contains,
-  createSubscribe,
   createUserWithEmailAndPassword,
   debugAssert,
   debugErrorMap,
-  deepExtend,
-  deleteApp,
   fetchSignInMethodsForEmail,
   getAdditionalUserInfo,
-  getGlobal,
   getMultiFactorResolver,
   getRedirectResult,
-  getUA,
   inMemoryPersistence,
-  index_esm2017_exports,
   indexedDBLocalPersistence,
-  initializeApp,
-  isBrowserExtension,
-  isIE,
-  isIndexedDBAvailable,
-  isNode,
-  isReactNative,
   isSignInWithEmailLink,
   linkWithCredential,
   linkWithPhoneNumber,
   linkWithPopup,
   linkWithRedirect,
   multiFactor,
-  onLog,
-  querystringDecode,
   reauthenticateWithCredential,
   reauthenticateWithPhoneNumber,
   reauthenticateWithPopup,
   reauthenticateWithRedirect,
-  registerVersion,
+  require_undici,
   sendEmailVerification,
   sendPasswordResetEmail,
   sendSignInLinkToEmail,
-  setLogLevel,
   signInAnonymously,
   signInWithCredential,
   signInWithCustomToken,
   signInWithEmailAndPassword,
   signInWithEmailLink,
+  signInWithIdp,
   signInWithPhoneNumber,
   signInWithPopup,
   signInWithRedirect,
@@ -100,10 +81,43 @@ import {
   updateProfile,
   verifyBeforeUpdateEmail,
   verifyPasswordResetCode
-} from "./chunk-XE56KNTY.js";
+} from "./chunk-5XTFOKG7.js";
 import {
-  __async
-} from "./chunk-35ENWJA4.js";
+  Component,
+  DEFAULT_ENTRY_NAME,
+  ErrorFactory,
+  FirebaseError,
+  Logger,
+  SDK_VERSION,
+  _addComponent,
+  _addOrOverwriteComponent,
+  _isFirebaseServerApp,
+  _registerComponent,
+  contains,
+  createSubscribe,
+  deepExtend,
+  deleteApp,
+  getGlobal,
+  getUA,
+  index_esm2017_exports,
+  initializeApp,
+  isBrowserExtension,
+  isEmpty,
+  isIE,
+  isIndexedDBAvailable,
+  isNode,
+  isReactNative,
+  onLog,
+  querystring,
+  querystringDecode,
+  registerVersion,
+  setLogLevel
+} from "./chunk-3HWNS6QV.js";
+import {
+  __async,
+  __superGet,
+  __toESM
+} from "./chunk-LKDWXENB.js";
 
 // node_modules/@angular/fire/node_modules/@firebase/app-compat/dist/esm/index.esm2017.js
 var FirebaseAppImpl = class {
@@ -337,9 +351,411 @@ try {
 var firebase = firebase$1;
 registerCoreComponents();
 
-// node_modules/@angular/fire/node_modules/@firebase/auth/dist/esm2017/internal.js
+// node_modules/@angular/fire/node_modules/@firebase/auth/dist/node-esm/internal.js
+var import_undici = __toESM(require_undici());
+function _generateEventId(prefix = "", digits = 10) {
+  let random = "";
+  for (let i = 0; i < digits; i++) {
+    random += Math.floor(Math.random() * 10);
+  }
+  return prefix + random;
+}
+function _withDefaultResolver(auth, resolverOverride) {
+  if (resolverOverride) {
+    return _getInstance(resolverOverride);
+  }
+  _assert(
+    auth._popupRedirectResolver,
+    auth,
+    "argument-error"
+    /* AuthErrorCode.ARGUMENT_ERROR */
+  );
+  return auth._popupRedirectResolver;
+}
+var IdpCredential = class extends AuthCredential {
+  constructor(params) {
+    super(
+      "custom",
+      "custom"
+      /* ProviderId.CUSTOM */
+    );
+    this.params = params;
+  }
+  _getIdTokenResponse(auth) {
+    return signInWithIdp(auth, this._buildIdpRequest());
+  }
+  _linkToIdToken(auth, idToken) {
+    return signInWithIdp(auth, this._buildIdpRequest(idToken));
+  }
+  _getReauthenticationResolver(auth) {
+    return signInWithIdp(auth, this._buildIdpRequest());
+  }
+  _buildIdpRequest(idToken) {
+    const request = {
+      requestUri: this.params.requestUri,
+      sessionId: this.params.sessionId,
+      postBody: this.params.postBody,
+      tenantId: this.params.tenantId,
+      pendingToken: this.params.pendingToken,
+      returnSecureToken: true,
+      returnIdpCredential: true
+    };
+    if (idToken) {
+      request.idToken = idToken;
+    }
+    return request;
+  }
+};
+function _signIn(params) {
+  return _signInWithCredential(params.auth, new IdpCredential(params), params.bypassAuthState);
+}
+function _reauth(params) {
+  const {
+    auth,
+    user
+  } = params;
+  _assert(
+    user,
+    auth,
+    "internal-error"
+    /* AuthErrorCode.INTERNAL_ERROR */
+  );
+  return _reauthenticate(user, new IdpCredential(params), params.bypassAuthState);
+}
+function _link2(params) {
+  return __async(this, null, function* () {
+    const {
+      auth,
+      user
+    } = params;
+    _assert(
+      user,
+      auth,
+      "internal-error"
+      /* AuthErrorCode.INTERNAL_ERROR */
+    );
+    return _link(user, new IdpCredential(params), params.bypassAuthState);
+  });
+}
+var AbstractPopupRedirectOperation = class {
+  constructor(auth, filter, resolver, user, bypassAuthState = false) {
+    this.auth = auth;
+    this.resolver = resolver;
+    this.user = user;
+    this.bypassAuthState = bypassAuthState;
+    this.pendingPromise = null;
+    this.eventManager = null;
+    this.filter = Array.isArray(filter) ? filter : [filter];
+  }
+  execute() {
+    return new Promise((resolve, reject) => __async(this, null, function* () {
+      this.pendingPromise = {
+        resolve,
+        reject
+      };
+      try {
+        this.eventManager = yield this.resolver._initialize(this.auth);
+        yield this.onExecution();
+        this.eventManager.registerConsumer(this);
+      } catch (e) {
+        this.reject(e);
+      }
+    }));
+  }
+  onAuthEvent(event) {
+    return __async(this, null, function* () {
+      const {
+        urlResponse,
+        sessionId,
+        postBody,
+        tenantId,
+        error,
+        type
+      } = event;
+      if (error) {
+        this.reject(error);
+        return;
+      }
+      const params = {
+        auth: this.auth,
+        requestUri: urlResponse,
+        sessionId,
+        tenantId: tenantId || void 0,
+        postBody: postBody || void 0,
+        user: this.user,
+        bypassAuthState: this.bypassAuthState
+      };
+      try {
+        this.resolve(yield this.getIdpTask(type)(params));
+      } catch (e) {
+        this.reject(e);
+      }
+    });
+  }
+  onError(error) {
+    this.reject(error);
+  }
+  getIdpTask(type) {
+    switch (type) {
+      case "signInViaPopup":
+      case "signInViaRedirect":
+        return _signIn;
+      case "linkViaPopup":
+      case "linkViaRedirect":
+        return _link2;
+      case "reauthViaPopup":
+      case "reauthViaRedirect":
+        return _reauth;
+      default:
+        _fail(
+          this.auth,
+          "internal-error"
+          /* AuthErrorCode.INTERNAL_ERROR */
+        );
+    }
+  }
+  resolve(cred) {
+    debugAssert(this.pendingPromise, "Pending promise was never set");
+    this.pendingPromise.resolve(cred);
+    this.unregisterAndCleanUp();
+  }
+  reject(error) {
+    debugAssert(this.pendingPromise, "Pending promise was never set");
+    this.pendingPromise.reject(error);
+    this.unregisterAndCleanUp();
+  }
+  unregisterAndCleanUp() {
+    if (this.eventManager) {
+      this.eventManager.unregisterConsumer(this);
+    }
+    this.pendingPromise = null;
+    this.cleanUp();
+  }
+};
+var PENDING_REDIRECT_KEY = "pendingRedirect";
+var redirectOutcomeMap = /* @__PURE__ */ new Map();
+var RedirectAction = class _RedirectAction extends AbstractPopupRedirectOperation {
+  constructor(auth, resolver, bypassAuthState = false) {
+    super(auth, [
+      "signInViaRedirect",
+      "linkViaRedirect",
+      "reauthViaRedirect",
+      "unknown"
+      /* AuthEventType.UNKNOWN */
+    ], resolver, void 0, bypassAuthState);
+    this.eventId = null;
+  }
+  /**
+   * Override the execute function; if we already have a redirect result, then
+   * just return it.
+   */
+  execute() {
+    return __async(this, null, function* () {
+      let readyOutcome = redirectOutcomeMap.get(this.auth._key());
+      if (!readyOutcome) {
+        try {
+          const hasPendingRedirect = yield _getAndClearPendingRedirectStatus(this.resolver, this.auth);
+          const result = hasPendingRedirect ? yield __superGet(_RedirectAction.prototype, this, "execute").call(this) : null;
+          readyOutcome = () => Promise.resolve(result);
+        } catch (e) {
+          readyOutcome = () => Promise.reject(e);
+        }
+        redirectOutcomeMap.set(this.auth._key(), readyOutcome);
+      }
+      if (!this.bypassAuthState) {
+        redirectOutcomeMap.set(this.auth._key(), () => Promise.resolve(null));
+      }
+      return readyOutcome();
+    });
+  }
+  onAuthEvent(event) {
+    return __async(this, null, function* () {
+      if (event.type === "signInViaRedirect") {
+        return __superGet(_RedirectAction.prototype, this, "onAuthEvent").call(this, event);
+      } else if (event.type === "unknown") {
+        this.resolve(null);
+        return;
+      }
+      if (event.eventId) {
+        const user = yield this.auth._redirectUserForId(event.eventId);
+        if (user) {
+          this.user = user;
+          return __superGet(_RedirectAction.prototype, this, "onAuthEvent").call(this, event);
+        } else {
+          this.resolve(null);
+        }
+      }
+    });
+  }
+  onExecution() {
+    return __async(this, null, function* () {
+    });
+  }
+  cleanUp() {
+  }
+};
+function _getAndClearPendingRedirectStatus(resolver, auth) {
+  return __async(this, null, function* () {
+    const key = pendingRedirectKey(auth);
+    const persistence = resolverPersistence(resolver);
+    if (!(yield persistence._isAvailable())) {
+      return false;
+    }
+    const hasPendingRedirect = (yield persistence._get(key)) === "true";
+    yield persistence._remove(key);
+    return hasPendingRedirect;
+  });
+}
+function _clearRedirectOutcomes() {
+  redirectOutcomeMap.clear();
+}
+function _overrideRedirectResult(auth, result) {
+  redirectOutcomeMap.set(auth._key(), result);
+}
+function resolverPersistence(resolver) {
+  return _getInstance(resolver._redirectPersistence);
+}
+function pendingRedirectKey(auth) {
+  return _persistenceKeyName(PENDING_REDIRECT_KEY, auth.config.apiKey, auth.name);
+}
+function _getRedirectResult(auth, resolverExtern, bypassAuthState = false) {
+  return __async(this, null, function* () {
+    if (_isFirebaseServerApp(auth.app)) {
+      return Promise.reject(_serverAppCurrentUserOperationNotSupportedError(auth));
+    }
+    const authInternal = _castAuth(auth);
+    const resolver = _withDefaultResolver(authInternal, resolverExtern);
+    const action = new RedirectAction(authInternal, resolver, bypassAuthState);
+    const result = yield action.execute();
+    if (result && !bypassAuthState) {
+      delete result.user._redirectEventId;
+      yield authInternal._persistUserIfCurrent(result.user);
+      yield authInternal._setRedirectUser(null, resolverExtern);
+    }
+    return result;
+  });
+}
+var STORAGE_AVAILABLE_KEY = "__sak";
+var BrowserPersistenceClass = class {
+  constructor(storageRetriever, type) {
+    this.storageRetriever = storageRetriever;
+    this.type = type;
+  }
+  _isAvailable() {
+    try {
+      if (!this.storage) {
+        return Promise.resolve(false);
+      }
+      this.storage.setItem(STORAGE_AVAILABLE_KEY, "1");
+      this.storage.removeItem(STORAGE_AVAILABLE_KEY);
+      return Promise.resolve(true);
+    } catch (_a) {
+      return Promise.resolve(false);
+    }
+  }
+  _set(key, value) {
+    this.storage.setItem(key, JSON.stringify(value));
+    return Promise.resolve();
+  }
+  _get(key) {
+    const json = this.storage.getItem(key);
+    return Promise.resolve(json ? JSON.parse(json) : null);
+  }
+  _remove(key) {
+    this.storage.removeItem(key);
+    return Promise.resolve();
+  }
+  get storage() {
+    return this.storageRetriever();
+  }
+};
+var BrowserSessionPersistence = class extends BrowserPersistenceClass {
+  constructor() {
+    super(
+      () => window.sessionStorage,
+      "SESSION"
+      /* PersistenceType.SESSION */
+    );
+  }
+  _addListener(_key, _listener) {
+    return;
+  }
+  _removeListener(_key, _listener) {
+    return;
+  }
+};
+BrowserSessionPersistence.type = "SESSION";
+var browserSessionPersistence2 = BrowserSessionPersistence;
+var WIDGET_PATH = "__/auth/handler";
+var EMULATOR_WIDGET_PATH = "emulator/auth/handler";
+var FIREBASE_APP_CHECK_FRAGMENT_ID = encodeURIComponent("fac");
+function _getRedirectUrl(auth, provider, authType, redirectUrl, eventId, additionalParams) {
+  return __async(this, null, function* () {
+    _assert(
+      auth.config.authDomain,
+      auth,
+      "auth-domain-config-required"
+      /* AuthErrorCode.MISSING_AUTH_DOMAIN */
+    );
+    _assert(
+      auth.config.apiKey,
+      auth,
+      "invalid-api-key"
+      /* AuthErrorCode.INVALID_API_KEY */
+    );
+    const params = {
+      apiKey: auth.config.apiKey,
+      appName: auth.name,
+      authType,
+      redirectUrl,
+      v: SDK_VERSION,
+      eventId
+    };
+    if (provider instanceof FederatedAuthProvider) {
+      provider.setDefaultLanguage(auth.languageCode);
+      params.providerId = provider.providerId || "";
+      if (!isEmpty(provider.getCustomParameters())) {
+        params.customParameters = JSON.stringify(provider.getCustomParameters());
+      }
+      for (const [key, value] of Object.entries(additionalParams || {})) {
+        params[key] = value;
+      }
+    }
+    if (provider instanceof BaseOAuthProvider) {
+      const scopes = provider.getScopes().filter((scope) => scope !== "");
+      if (scopes.length > 0) {
+        params.scopes = scopes.join(",");
+      }
+    }
+    if (auth.tenantId) {
+      params.tid = auth.tenantId;
+    }
+    const paramsDict = params;
+    for (const key of Object.keys(paramsDict)) {
+      if (paramsDict[key] === void 0) {
+        delete paramsDict[key];
+      }
+    }
+    const appCheckToken = yield auth._getAppCheckToken();
+    const appCheckTokenFragment = appCheckToken ? `#${FIREBASE_APP_CHECK_FRAGMENT_ID}=${encodeURIComponent(appCheckToken)}` : "";
+    return `${getHandlerBase(auth)}?${querystring(paramsDict).slice(1)}${appCheckTokenFragment}`;
+  });
+}
+function getHandlerBase({
+  config
+}) {
+  if (!config.emulator) {
+    return `https://${config.authDomain}/${WIDGET_PATH}`;
+  }
+  return _emulatorUrl(config, EMULATOR_WIDGET_PATH);
+}
 function _cordovaWindow() {
   return window;
+}
+function _getProjectConfig(_0) {
+  return __async(this, arguments, function* (auth, request = {}) {
+    return _performApiRequest(auth, "GET", "/v1/projects", request);
+  });
 }
 var REDIRECT_TIMEOUT_MS = 2e3;
 function _generateHandlerUrl(auth, event, provider) {
@@ -501,6 +917,232 @@ function stringToArrayBuffer(str) {
   }
   return view;
 }
+var EVENT_DUPLICATION_CACHE_DURATION_MS = 10 * 60 * 1e3;
+var AuthEventManager = class {
+  constructor(auth) {
+    this.auth = auth;
+    this.cachedEventUids = /* @__PURE__ */ new Set();
+    this.consumers = /* @__PURE__ */ new Set();
+    this.queuedRedirectEvent = null;
+    this.hasHandledPotentialRedirect = false;
+    this.lastProcessedEventTime = Date.now();
+  }
+  registerConsumer(authEventConsumer) {
+    this.consumers.add(authEventConsumer);
+    if (this.queuedRedirectEvent && this.isEventForConsumer(this.queuedRedirectEvent, authEventConsumer)) {
+      this.sendToConsumer(this.queuedRedirectEvent, authEventConsumer);
+      this.saveEventToCache(this.queuedRedirectEvent);
+      this.queuedRedirectEvent = null;
+    }
+  }
+  unregisterConsumer(authEventConsumer) {
+    this.consumers.delete(authEventConsumer);
+  }
+  onEvent(event) {
+    if (this.hasEventBeenHandled(event)) {
+      return false;
+    }
+    let handled = false;
+    this.consumers.forEach((consumer) => {
+      if (this.isEventForConsumer(event, consumer)) {
+        handled = true;
+        this.sendToConsumer(event, consumer);
+        this.saveEventToCache(event);
+      }
+    });
+    if (this.hasHandledPotentialRedirect || !isRedirectEvent(event)) {
+      return handled;
+    }
+    this.hasHandledPotentialRedirect = true;
+    if (!handled) {
+      this.queuedRedirectEvent = event;
+      handled = true;
+    }
+    return handled;
+  }
+  sendToConsumer(event, consumer) {
+    var _a;
+    if (event.error && !isNullRedirectEvent(event)) {
+      const code = ((_a = event.error.code) === null || _a === void 0 ? void 0 : _a.split("auth/")[1]) || "internal-error";
+      consumer.onError(_createError(this.auth, code));
+    } else {
+      consumer.onAuthEvent(event);
+    }
+  }
+  isEventForConsumer(event, consumer) {
+    const eventIdMatches = consumer.eventId === null || !!event.eventId && event.eventId === consumer.eventId;
+    return consumer.filter.includes(event.type) && eventIdMatches;
+  }
+  hasEventBeenHandled(event) {
+    if (Date.now() - this.lastProcessedEventTime >= EVENT_DUPLICATION_CACHE_DURATION_MS) {
+      this.cachedEventUids.clear();
+    }
+    return this.cachedEventUids.has(eventUid(event));
+  }
+  saveEventToCache(event) {
+    this.cachedEventUids.add(eventUid(event));
+    this.lastProcessedEventTime = Date.now();
+  }
+};
+function eventUid(e) {
+  return [e.type, e.eventId, e.sessionId, e.tenantId].filter((v) => v).join("-");
+}
+function isNullRedirectEvent({
+  type,
+  error
+}) {
+  return type === "unknown" && (error === null || error === void 0 ? void 0 : error.code) === `auth/${"no-auth-event"}`;
+}
+function isRedirectEvent(event) {
+  switch (event.type) {
+    case "signInViaRedirect":
+    case "linkViaRedirect":
+    case "reauthViaRedirect":
+      return true;
+    case "unknown":
+      return isNullRedirectEvent(event);
+    default:
+      return false;
+  }
+}
+var _POLLING_INTERVAL_MS = 1e3;
+var IE10_LOCAL_STORAGE_SYNC_DELAY = 10;
+var BrowserLocalPersistence = class _BrowserLocalPersistence extends BrowserPersistenceClass {
+  constructor() {
+    super(
+      () => window.localStorage,
+      "LOCAL"
+      /* PersistenceType.LOCAL */
+    );
+    this.boundEventHandler = (event, poll) => this.onStorageEvent(event, poll);
+    this.listeners = {};
+    this.localCache = {};
+    this.pollTimer = null;
+    this.fallbackToPolling = _isMobileBrowser();
+    this._shouldAllowMigration = true;
+  }
+  forAllChangedKeys(cb) {
+    for (const key of Object.keys(this.listeners)) {
+      const newValue = this.storage.getItem(key);
+      const oldValue = this.localCache[key];
+      if (newValue !== oldValue) {
+        cb(key, oldValue, newValue);
+      }
+    }
+  }
+  onStorageEvent(event, poll = false) {
+    if (!event.key) {
+      this.forAllChangedKeys((key2, _oldValue, newValue) => {
+        this.notifyListeners(key2, newValue);
+      });
+      return;
+    }
+    const key = event.key;
+    if (poll) {
+      this.detachListener();
+    } else {
+      this.stopPolling();
+    }
+    const triggerListeners = () => {
+      const storedValue2 = this.storage.getItem(key);
+      if (!poll && this.localCache[key] === storedValue2) {
+        return;
+      }
+      this.notifyListeners(key, storedValue2);
+    };
+    const storedValue = this.storage.getItem(key);
+    if (_isIE10() && storedValue !== event.newValue && event.newValue !== event.oldValue) {
+      setTimeout(triggerListeners, IE10_LOCAL_STORAGE_SYNC_DELAY);
+    } else {
+      triggerListeners();
+    }
+  }
+  notifyListeners(key, value) {
+    this.localCache[key] = value;
+    const listeners = this.listeners[key];
+    if (listeners) {
+      for (const listener of Array.from(listeners)) {
+        listener(value ? JSON.parse(value) : value);
+      }
+    }
+  }
+  startPolling() {
+    this.stopPolling();
+    this.pollTimer = setInterval(() => {
+      this.forAllChangedKeys((key, oldValue, newValue) => {
+        this.onStorageEvent(
+          new StorageEvent("storage", {
+            key,
+            oldValue,
+            newValue
+          }),
+          /* poll */
+          true
+        );
+      });
+    }, _POLLING_INTERVAL_MS);
+  }
+  stopPolling() {
+    if (this.pollTimer) {
+      clearInterval(this.pollTimer);
+      this.pollTimer = null;
+    }
+  }
+  attachListener() {
+    window.addEventListener("storage", this.boundEventHandler);
+  }
+  detachListener() {
+    window.removeEventListener("storage", this.boundEventHandler);
+  }
+  _addListener(key, listener) {
+    if (Object.keys(this.listeners).length === 0) {
+      if (this.fallbackToPolling) {
+        this.startPolling();
+      } else {
+        this.attachListener();
+      }
+    }
+    if (!this.listeners[key]) {
+      this.listeners[key] = /* @__PURE__ */ new Set();
+      this.localCache[key] = this.storage.getItem(key);
+    }
+    this.listeners[key].add(listener);
+  }
+  _removeListener(key, listener) {
+    if (this.listeners[key]) {
+      this.listeners[key].delete(listener);
+      if (this.listeners[key].size === 0) {
+        delete this.listeners[key];
+      }
+    }
+    if (Object.keys(this.listeners).length === 0) {
+      this.detachListener();
+      this.stopPolling();
+    }
+  }
+  // Update local cache on base operations:
+  _set(key, value) {
+    return __async(this, null, function* () {
+      yield __superGet(_BrowserLocalPersistence.prototype, this, "_set").call(this, key, value);
+      this.localCache[key] = JSON.stringify(value);
+    });
+  }
+  _get(key) {
+    return __async(this, null, function* () {
+      const value = yield __superGet(_BrowserLocalPersistence.prototype, this, "_get").call(this, key);
+      this.localCache[key] = JSON.stringify(value);
+      return value;
+    });
+  }
+  _remove(key) {
+    return __async(this, null, function* () {
+      yield __superGet(_BrowserLocalPersistence.prototype, this, "_remove").call(this, key);
+      delete this.localCache[key];
+    });
+  }
+};
+BrowserLocalPersistence.type = "LOCAL";
+var browserLocalPersistence2 = BrowserLocalPersistence;
 var SESSION_ID_LENGTH = 20;
 var CordovaAuthEventManager = class extends AuthEventManager {
   constructor() {
@@ -602,7 +1244,7 @@ function generateSessionId() {
   return chars.join("");
 }
 function storage() {
-  return _getInstance(browserLocalPersistence);
+  return _getInstance(browserLocalPersistence2);
 }
 function persistenceKey(auth) {
   return _persistenceKeyName("authEvent", auth.config.apiKey, auth.name);
@@ -632,7 +1274,7 @@ function searchParamsOrEmpty(url) {
 var INITIAL_EVENT_TIMEOUT_MS = 500;
 var CordovaPopupRedirectResolver = class {
   constructor() {
-    this._redirectPersistence = browserSessionPersistence;
+    this._redirectPersistence = browserSessionPersistence2;
     this._shouldInitProactively = true;
     this.eventManagers = /* @__PURE__ */ new Map();
     this.originValidationPromises = {};
@@ -742,7 +1384,8 @@ function addFrameworkForLogging(auth, framework) {
   _castAuth(auth)._logFramework(framework);
 }
 
-// node_modules/@angular/fire/node_modules/@firebase/auth-compat/dist/index.esm2017.js
+// node_modules/@angular/fire/node_modules/@firebase/auth-compat/dist/esm/index.node.esm.js
+var import_undici2 = __toESM(require_undici());
 var name2 = "@firebase/auth-compat";
 var version2 = "0.5.14";
 var CORDOVA_ONDEVICEREADY_TIMEOUT_MS = 1e3;
@@ -1560,6 +2203,7 @@ function registerAuthCompat(instance) {
   instance.registerVersion(name2, version2);
 }
 registerAuthCompat(firebase);
+FetchProvider.initialize(import_undici2.fetch, import_undici2.Headers, import_undici2.Response);
 
 export {
   firebase
@@ -1600,10 +2244,60 @@ export {
    * limitations under the License.
    *)
 
-@firebase/auth/dist/esm2017/internal.js:
+@firebase/auth/dist/node-esm/internal.js:
+  (**
+   * @license
+   * Copyright 2020 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+  (**
+   * @license
+   * Copyright 2020 Google LLC.
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+
+@firebase/auth/dist/node-esm/internal.js:
   (**
    * @license
    * Copyright 2021 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
+  (**
+   * @license
+   * Copyright 2019 Google LLC
    *
    * Licensed under the Apache License, Version 2.0 (the "License");
    * you may not use this file except in compliance with the License.
@@ -1650,7 +2344,7 @@ export {
    * limitations under the License.
    *)
 
-@firebase/auth-compat/dist/index.esm2017.js:
+@firebase/auth-compat/dist/esm/index.node.esm.js:
   (**
    * @license
    * Copyright 2020 Google LLC
@@ -1667,5 +2361,21 @@ export {
    * See the License for the specific language governing permissions and
    * limitations under the License.
    *)
+  (**
+   * @license
+   * Copyright 2017 Google LLC
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *   http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   *)
 */
-//# sourceMappingURL=chunk-DMV6VCME.js.map
+//# sourceMappingURL=chunk-PMEDPYXP.js.map

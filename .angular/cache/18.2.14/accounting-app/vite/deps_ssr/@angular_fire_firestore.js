@@ -8,9 +8,11 @@ import {
 } from "./chunk-25354Y6X.js";
 import {
   AuthInstances
-} from "./chunk-OVFEDLAY.js";
+} from "./chunk-YH3OJHQM.js";
 import "./chunk-HV2AWGOI.js";
 import "./chunk-2MJSTNSL.js";
+import "./chunk-5XTFOKG7.js";
+import "./chunk-SHNWMCCJ.js";
 import {
   FirebaseApp,
   FirebaseApps,
@@ -20,7 +22,7 @@ import {
   ɵgetAllInstancesOf,
   ɵgetDefaultInstanceOf,
   ɵzoneWrap
-} from "./chunk-OP3R7CGS.js";
+} from "./chunk-MJFYZGOI.js";
 import {
   Component,
   FirebaseError,
@@ -39,8 +41,7 @@ import {
   isIndexedDBAvailable,
   isSafari,
   registerVersion
-} from "./chunk-7MSQYH24.js";
-import "./chunk-SHNWMCCJ.js";
+} from "./chunk-3HWNS6QV.js";
 import "./chunk-BEQVC6RL.js";
 import {
   InjectionToken,
