@@ -7,7 +7,7 @@
           Especifique el monto y el tipo
         </p>
 
-        <form (ngSubmit)="createNewCreditDebit()" [formGroup]="form">
+        <form (ngSubmit)="createNewCreditDebit()" [formGroup]="form!">
 
           <div class="form-group">
             <label>Descripción</label>
@@ -34,16 +34,16 @@
           <div class="form-group">
             <label>Tipo</label>
             <br>
-            <button *ngIf="form.get('type').value === 'credit'" (click)="setType('debit')" type="button" class="btn btn-primary btn-block">
+            <button *ngIf="form?.get('type')?.value === 'credit'" (click)="setType('debit')" type="button" class="btn btn-primary btn-block">
               credit
             </button>
-            <button *ngIf="form.get('type').value ==='debit'" (click)="setType('credit')" type="button" class="btn btn-warning btn-block">
+            <button *ngIf="form?.get('type')?.value ==='debit'" (click)="setType('credit')" type="button" class="btn btn-warning btn-block">
               debit
             </button>
           </div>
 
           <hr>
-          <button type="submit" class="btn btn-success mr-2" [disabled]="form.invalid" *ngIf="!(loadingStatus$| async)?.isLoading">
+          <button type="submit" class="btn btn-success mr-2" [disabled]="form?.invalid" *ngIf="!(loadingStatus$| async)?.isLoading">
             <i class="fa fa-save"></i>
             Add
           </button>

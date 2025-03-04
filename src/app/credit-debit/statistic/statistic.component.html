@@ -57,12 +57,14 @@
           <div class="float-right">
             <p class="mb-0 text-right">Balanace</p>
             <div class="fluid-container">
-              <h3 [ngClass]="{
-                      'text-success': (totalCredit$ | async) - (totalDebit$ | async) > 0,
-                      'text-danger': (totalCredit$ | async) - (totalDebit$ | async) < 0
+              
+
+               <h3 [ngClass]="{
+                      'text-success': successStatus$ | async,
+                      'text-danger': (dangerStatus$ | async) 
                     }"
                   class="font-weight-medium text-right mb-0">
-                {{ (totalCredit$ | async) - (totalDebit$ | async) | currency }}
+                {{ (resultCreditDebit$ | async) | currency }}
               </h3>
             </div>
           </div>
@@ -73,21 +75,26 @@
     </div>
   </div>
 
-  <div class="col-12 p-5" *ngIf="(totalCredit$ | async)> 0 || (totalDebit$ | async)> 0">
-    <div class="card card-statistics">
-      <div class="card-body">
-        <h1 class="card-title">Gráfica</h1>
+  @if (isGreaterThanZeroTotalCreditDebit$ | async) {
 
-        <div style="display: block">
-          <canvas baseChart
-                  [data]="creditDebit$ | async"
-                  [labels]="doughnutChartLabels"
-                  [chartType]="'doughnut'">
-          </canvas>
+
+    <div class="col-12 p-5" >
+      <div class="card card-statistics">
+        <div class="card-body">
+          <h1 class="card-title">Gráfica</h1>
+  
+          <div style="display: block">
+           <!-- <canvas baseChart
+                    [data]="creditDebit$ | async"
+                    [labels]="doughnutChartLabels"
+                    [chartType]="'doughnut'">
+            </canvas>-->
+          </div>
+  
         </div>
-
       </div>
     </div>
-  </div>
+
+  }
 
 </div>

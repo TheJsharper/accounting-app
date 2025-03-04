@@ -14,24 +14,29 @@
           </tr>
           </thead>
 
-          <tbody>
-          <tr *ngFor="let item of (creditDebit$| async).items | orderByCreditDebit">
-            <td>{{item.description}}</td>
-            <td>{{item.amount | currency}}</td>
-            <td>
-             <span  [ngClass]="{
-             'text-success': item.type =='credit',
-              'text-danger': item.type =='debit'
-             }" ></span> {{item.type}}
-            </td>
-            <td>
-              <button class="btn btn-danger" (click)="removeItemAsync(item.uid)">
-                <i class="fa fa-trash">&#160;Remove</i>
-              </button>
+          @if ((creditDebit$| async)!==null && (creditDebit$| async)?.items !== undefined && (creditDebit$| async)?.items !== null){
 
-            </td>
-          </tr>
-          </tbody>
+
+            <tbody>
+            <tr *ngFor="let item of (creditDebit$| async)!.items  | orderByCreditDebit">
+              <td>{{item.description}}</td>
+              <td>{{item.amount | currency}}</td>
+              <td>
+               <span  [ngClass]="{
+               'text-success': item.type =='credit',
+                'text-danger': item.type =='debit'
+               }" ></span> {{item.type}}
+              </td>
+              <td>
+                <button class="btn btn-danger" (click)="removeItemAsync(item.uid)">
+                  <i class="fa fa-trash">&#160;Remove</i>
+                </button>
+  
+              </td>
+            </tr>
+            </tbody>
+
+          }
 
         </table>
 

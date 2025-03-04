@@ -18,7 +18,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
-    const items: Observable<any> = await this.creditDebitService.getCreditDebitItem();
+    const items: Observable<CreditDebitModel[]>= await this.creditDebitService.getCreditDebitItem();
     this.subscriptions.push(items.subscribe((items: CreditDebitModel[]) => this.store.dispatch(new SetItemsAction(items))));
   }
 

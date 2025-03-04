@@ -24,6 +24,8 @@ export function creditDebitReducer(state: CreditDebitState = initialState, actio
             return {...item};
           })
         };
+      }else {
+        return state;
       }
     }
     case  UNSET_ITEMS: {

@@ -1,66 +1,78 @@
-import {Injectable} from '@angular/core';
-import {AngularFirestore, DocumentChangeAction, DocumentReference} from '@angular/fire/firestore';
-import {CreditDebitModel} from './credit-debit.model';
-import {AuthService} from '../auth/auth.service';
-import {AppState} from '../app.reducer';
-import {Store} from '@ngrx/store';
-import {Observable, Subscription} from 'rxjs';
-import {User} from '../auth/user.model';
-import {AuthState} from '../auth/auth.reducer';
-import {filter, map, take} from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { doc, DocumentReference, Firestore } from '@angular/fire/firestore';
+import { Store } from '@ngrx/store';
+import { getDoc, setDoc } from 'firebase/firestore';
+import { lastValueFrom, Observable } from 'rxjs';
+import { filter, map, take } from 'rxjs/operators';
+import { AppState } from '../app.reducer';
+import { AuthState } from '../auth/auth.reducer';
+import { AuthService } from '../auth/auth.service';
+import { CreditDebitModel } from './credit-debit.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CreditDebitService {
 
-  constructor(private afDB: AngularFirestore, private authService: AuthService, private store: Store<AppState>) {
+  constructor(  private authService: AuthService, private store: Store<AppState>, private firestore: Firestore) {
   }
 
   async getAuthState(): Promise<AuthState> {
 
-    let subscription: Subscription = new Subscription();
-    const authState: AuthState = await new Promise<AuthState>((resolve: (value: AuthState) => void, reject: (reason: any) => void) => {
-        subscription = this.store.select('auth').pipe(filter((value: AuthState) => value.user != null), take(1)).subscribe(resolve, reject);
-
-      }
-    );
-    subscription.unsubscribe();
-    return authState;
-
-
+      const result = this.store.select('auth').pipe(
+      filter((value: AuthState | undefined) => value !== undefined && value.user != null),
+      map((value: AuthState | undefined) => value as AuthState), take(1),);
+    return await lastValueFrom(result);
   }
 
-  async getCreditDebitItem(): Promise<any> {
+ async getCreditDebitItem(): Promise<Observable<CreditDebitModel[]>> {
 
     const authState: AuthState = await this.getAuthState();
-    return this.afDB.collection(`${authState.user.uid}/credit-debit/items`)
-      .snapshotChanges()
-      .pipe(
-        map((value: DocumentChangeAction<CreditDebitModel>[]) => {
 
-          return value.map((v: DocumentChangeAction<CreditDebitModel>) => {
-            const cdModel: CreditDebitModel = {...v.payload.doc.data(), uid: v.payload.doc.id};
-            return cdModel;
-          });
-        }));
+    const docRef = doc(this.firestore, `${authState.user.uid}/credit-debit/items`);
+  
+    const docResult = getDoc(docRef);
+    return new Observable<CreditDebitModel[]>((observer) => {
+      docResult.then((value) => {
+        observer.next(value.data() as CreditDebitModel[]);
+        observer.complete();
+      }).catch((error) => {
+        observer.error(error);
+      });
+    });
 
   }
 
   async createCreditDebit(value: CreditDebitModel): Promise<DocumentReference> {
-    //this.store.select('auth').subscribe()
-    value.uid = this.authService.UserLocal.uid;
-    return this.afDB.doc(`${this.authService.UserLocal.uid}/credit-debit`).collection('items').add({...value});
+    value.uid = this.authService.UserLocal.uid??'';
+    const ref = await doc(this.firestore,
+      `${this.authService.UserLocal.uid}/credit-debit/items`);
+
+    setDoc(ref, { ...value });
+    return ref;
 
   }
 
   getCreditDebit(): Observable<CreditDebitModel[]> {
-    return this.afDB.collection<CreditDebitModel>(`${this.authService.UserLocal.uid}/credit-debit/items`).valueChanges();
-  }
+    const docRef = doc(this.firestore, `${this.authService.UserLocal.uid}/credit-debit/items`);
+    const docResult = getDoc(docRef);
 
+    return new Observable<CreditDebitModel[]>((observer) => {
+      docResult.then((value) => {
+        observer.next(value.data() as CreditDebitModel[]);
+        observer.complete();
+      }).catch((error) => {
+        observer.error(error);
+      });
+    });
+
+  }
   async removeCreditDebit(uid: string): Promise<void> {
 
     const authState: AuthState = await this.getAuthState();
-    return this.afDB.doc(`${authState.user.uid}/credit-debit/items/${uid}`).delete();
+
+ 
+    const docRef = doc(this.firestore, `${authState.user.uid}/credit-debit/items/${uid}`);
+    await setDoc(docRef, { ...{ deleted: true } }, { merge: true });
   }
 }

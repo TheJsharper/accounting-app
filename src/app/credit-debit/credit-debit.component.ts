@@ -38,7 +38,7 @@ export class CreditDebitComponent implements OnInit {
   async createNewCreditDebit(): Promise<void> {
     try {
       this.store.dispatch(new ActiveLoadingAction());
-      const creditDebit: CreditDebitModel = new CreditDebitModel(this.form?.get('description')?.value, this.form?.get('amount')?.value, this.form?.get('type')?.value);
+      const creditDebit: CreditDebitModel = new CreditDebitModel(this.form?.get('description')?.value?? '', this.form?.get('amount')?.value?? '', this.form?.get('type')?.value??'', '');
 
       await this.creditDebitService.createCreditDebit(creditDebit);
       this.form?.reset({amount: 0, type: 'credit', description: ''});

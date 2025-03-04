@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 //import { User } from 'firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, User, UserCredential } from 'firebase/auth';
+import { doc, DocumentData, getDoc, setDoc } from 'firebase/firestore';
 import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AppState } from '../app.reducer';
@@ -23,52 +24,62 @@ export class AuthService {
   private userLocal!: Partial<UserLocal.User>;
 
   public get UserLocal(): Partial<UserLocal.User> {
-    return {...this.userLocal};
+    return { ...this.userLocal };
   }
 
-  constructor(private afAth: Auth , private router: Router, @Inject(Firestore) private afDB: Firestore, @Inject(Store) private  store: Store<AppState>) {
+  constructor(private afAth: Auth, private router: Router, @Inject(Firestore) private afDB: Firestore, @Inject(Store) private store: Store<AppState>) {
   }
 
   initAuthListener(): void {
-    //this.afAth.authState.subscribe((user: User) => {
-      authState(this.afAth).subscribe((user: User| null ) => {
-      if (user) {
-        this.subscriptions.push(this.afDB.doc(`${user.uid}/user`)
-          .valueChanges()
-          .subscribe((userJson: any) => {
-              this.userLocal = new UserLocal.User(userJson.name, userJson.email, userJson.uid);
-              this.store.dispatch(new SetUserAction(this.userLocal! as UserLocal.User));
 
-            }
-          ));
-      } else {
-       // this.userLocal = null;
-        this.userLocal = {};
-        this.subscriptions.forEach((s: Subscription) => s.unsubscribe());
+
+    this.subscriptions.push(authState(this.afAth).subscribe((user: User | null) => {
+      if (user) {
+        const docRef = doc(this.afDB, `${user.uid}/user`);
+        getDoc(docRef).then((doc) => {
+          if (doc.exists()) {
+            const data: DocumentData = doc.data();
+            this.userLocal = new UserLocal.User(data['name'], data['email'], data['uid']);
+            this.store.dispatch(new SetUserAction(this.userLocal! as UserLocal.User));
+
+          }
+        }).catch((error) => {
+          this.userLocal = {};
+          this.subscriptions.forEach((s: Subscription) => s.unsubscribe());
+          console.log(error);
+
+        });
       }
-      console.log(user);
-    });
+
+    }));
   }
 
 
   createNewUser(name: string, email: string, password: string): void {
     this.store.dispatch(new ActiveLoadingAction());
-   // this.afAth.createUserWithEmailAndPassword(email, password)
-   //this.afAth.currentUser(email, password)
-   createUserWithEmailAndPassword(this.afAth, email, password)
+    createUserWithEmailAndPassword(this.afAth, email, password)
       .then(async (userCredential: /*firebase.auth.UserCredential*/ UserCredential) => {
         const user: UserLocal.User = {
           name,
           email: userCredential.user.email!,
           uid: userCredential.user.uid
         };
-        await this.afDB.doc(`${user.uid}/user`).set(user);
-        await this.router.navigate(['/']);
-        this.store.dispatch(new DeactivateLoadingAction());
+        const ref = doc(this.afDB, `${user.uid}/user`)
+
+        setDoc(ref, user).then(async (value) => {
+          this.store.dispatch(new SetUserAction(user));
+          await this.router.navigate(['/']);
+          this.store.dispatch(new DeactivateLoadingAction());
+        }
+        ).catch((err: any) => {
+          console.log(err);
+          this.store.dispatch(new DeactivateLoadingAction());
+        }
+        );
       }).catch((err: any) => {
-      console.log(err);
-      this.store.dispatch(new DeactivateLoadingAction());
-    });
+        console.log(err);
+        this.store.dispatch(new DeactivateLoadingAction());
+      });
 
   }
 
